@@ -1,0 +1,60 @@
+.accessibility {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.toggle-button-wrapper {
+  font-family: sans-serif;
+  font-size: 1em;
+  font-weight: normal;
+  line-height: 35px;
+}
+
+.toggle-button-wrapper * {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+[role="switch"] {
+  background-color: #000;
+  border: 0.062em solid #000;
+  border-radius: 25px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  height: 35px;
+  margin: 0 5px;
+  overflow: visible;
+  padding: 5px;
+  position: relative;
+  width: 70px;
+}
+
+[role="switch"]:focus {
+  outline: 3px dashed darkolivegreen; /* temp style to show focus state in POC */
+}
+
+.toggle-button-switch {
+  background: #ffd800;
+  border-color: #ffd800;
+  color: #000;
+  border: 1px solid #000;
+  border-radius: 50%;
+  display: inline-block;
+  height: 25px;
+  right: 5px;
+  line-height: 25px;
+  position: absolute;
+  top: 5px;
+  width: 25px;
+}
+
+[role="switch"][aria-checked="true"] .toggle-button-switch {
+  left: 5px;
+}
