@@ -1,29 +1,89 @@
-import React, { useState} from "react";
+import React, { useState } from "react";
 import "./App.css";
-// import DrumPad from "./components/drumPad";
-// import ToggleButton from "./components/toggle";
+
 
 function App() {
   const [isPower, togglePower] = useState(true);
   const [isbank, toggleBank] = useState(true);
-  const [volume, setVolume] = useState(50);
+  const [volume, setVolume] = useState(0.5);
   const [displayText, setDisplay] = useState("");
-
-  const getIdOfButton = (event)=> {
-    console.log(event.target.id);
-    console.log(event.target.childNodes[1]);
+  
+  const getIdOfButton = (event) => {
+    let btnId = event.target.id;
+    setDisplay(btnId);
     var audioId = event.target.childNodes[1];
-    
-    // var btnId = document.getElementById(event.srcElement.id);
-    audioId.play(); 
-  }
+    audioId.volume = volume;
+    audioId.play();
+    document.getElementById(btnId).className = "drum-pad-active";
+    setTimeout(function () {
+      document.getElementById(btnId).className = "drum-pad";
+    }, 100);
+  };
 
-  // useEffect(() => {
-    
-    
-  // }, [displayText]);
+  document.addEventListener("keypress", function (event) {
+    if (
+      (event.key) === "q" ||
+      (event.key) === "w" ||
+      (event.key) === "e" ||
+      (event.key) === "a" ||
+      (event.key) === "s" ||
+      (event.key) === "d" ||
+      (event.key) === "z" ||
+      (event.key) === "x" ||
+      (event.key) === "c"
+    ) {
+      let audioElement = document.getElementById(event.key.toUpperCase());    
+      audioElement.volume = volume;
+      audioElement.play();
+
+      let btnId = audioElement.parentNode.id;
+      document.getElementById(btnId).className = "drum-pad-active";
+      setDisplay(btnId);
+      setTimeout(function () {
+        document.getElementById(btnId).className = "drum-pad";
+      }, 100); 
+    }
+  });
+
+  const handleVolumeChange = (event) => {
+    event.preventDefault();
+    let currentVolumeValue = event.target.value;
+    if (currentVolumeValue < 0.1 && currentVolumeValue > 0) {
+      const regex = /^.*[.||0]/;
+      let newValue = currentVolumeValue.replace(regex, "");
+      setDisplay(`Volume: ${newValue}`);
+    } else if (
+      currentVolumeValue === "0.1" ||
+      currentVolumeValue === "0.2" ||
+      currentVolumeValue === "0.3" ||
+      currentVolumeValue === "0.4" ||
+      currentVolumeValue === "0.5" ||
+      currentVolumeValue === "0.6" ||
+      currentVolumeValue === "0.7" ||
+      currentVolumeValue === "0.8" ||
+      currentVolumeValue === "0.9"
+    ) {
+      const regex = /^.*[.]/;
+      let newValue = currentVolumeValue.replace(regex, "");
+      setDisplay(`Volume: ${newValue}0`);
+    } else if (currentVolumeValue === "1") {
+      setDisplay(`Volume: 100`);
+    } else if (currentVolumeValue === "0") {
+      setDisplay(`Volume: 00`);
+    } else {
+      const regex = /^.*[.]/;
+      let newValue = currentVolumeValue.replace(regex, "");
+      setDisplay(`Volume: ${newValue}`);
+    }
+
+    setVolume(event.target.value);
+    setTimeout(function () {
+      setDisplay("");
+    }, 1000);
+  };
+
   return (
-    <div className="App">
+    <div id="drum-machine" className="App">
       <div id="display">{displayText}</div>
       <div className="controllers">
         <div>
@@ -59,40 +119,42 @@ function App() {
             ></span>
           </div>
         </div>
-
         <div className="volume-controller">
           <p style={{ textAlign: "center", fontWeight: "600", margin: "5px" }}>
             volume
           </p>
           <input
+            className="volume-slider"
             type="range"
-            min="1"
-            max="100"
+            step="0.01"
+            min="0"
+            max="1"
             value={volume}
-            onChange={(event) => {
-              event.preventDefault();
-              setDisplay(`Volume: ${event.target.value}`);
-              setVolume(event.target.value);
-              
-            }}
+            disabled={!isPower}
+            onChange={handleVolumeChange}
           ></input>
         </div>
         <div>
           <p style={{ textAlign: "center", fontWeight: "600", margin: "5px" }}>
             Bank
           </p>
-          <div
+          <button
             style={{
               width: "60px",
               height: "34px",
-              background: isbank ? "#2196F3" : "#ccc",
+              background: isPower ? "#2196F3" : "#ccc",
               borderRadius: "34px",
               cursor: "pointer",
               position: "relative",
+              outline: "none",
+              border: "none",
             }}
+            disabled={!isPower}
             onClick={() => {
               toggleBank((prevState) => !prevState);
-              isbank ? setDisplay('Smooth Piano Kit') : setDisplay('Heater Kit');
+              isbank
+                ? setDisplay("Smooth Piano Kit")
+                : setDisplay("Heater Kit");
             }}
           >
             <span
@@ -109,228 +171,147 @@ function App() {
                 transform: isbank ? "translateX(26px)" : "translateX(0)",
               }}
             ></span>
-          </div>
+          </button>
         </div>
       </div>
       <div id="drum-pad-wrapper">
-        <button id="Heater-1"
+        <button
+          id={isbank ? "Heater 1" : "Chord 1"}
           className="drum-pad"
           onClick={getIdOfButton}
-            // isbank ? setDisplay('Heater-1') : setDisplay('Chord-1');
-          
-          onKeyDown={(e) => {
-            var q = document.getElementById("Q");
-            var keyCode = e.keyCode;
-            if(keyCode === 81){
-              q.play();
-              isbank ? setDisplay('Heater-1') : setDisplay('Chord-1');
-            }
-            
-            
-          }}
         >
           Q
           <audio
-            src={isbank ? "https://s3.amazonaws.com/freecodecamp/drums/Heater-1.mp3" : "https://s3.amazonaws.com/freecodecamp/drums/Chord_1.mp3"}
+            src={isPower ? isbank ? "https://s3.amazonaws.com/freecodecamp/drums/Heater-1.mp3" : "https://s3.amazonaws.com/freecodecamp/drums/Chord_1.mp3" : "#"
+            }
             className="clip"
             id="Q"
           ></audio>
         </button>
         <button
+          id={isbank ? "Heater 2" : "Chord 2"}
           className="drum-pad"
-          onClick={ getIdOfButton
-            // isbank ? setDisplay('Heater-2') : setDisplay('Chord-2');
-            
-          }
-          onKeyDown={(e) => {
-            var q = document.getElementById("Q");
-            var keyCode = e.keyCode;
-            if(keyCode === 87){
-              q.play();
-              isbank ? setDisplay('Heater-1') : setDisplay('Chord-1');
-            }
-            
-            
-          }}
+          onClick={getIdOfButton}
         >
           W
           <audio
-            src={isbank ? "https://s3.amazonaws.com/freecodecamp/drums/Heater-2.mp3" : "https://s3.amazonaws.com/freecodecamp/drums/Chord_2.mp3"}
+            src={isPower ?
+              isbank
+                ? "https://s3.amazonaws.com/freecodecamp/drums/Heater-2.mp3"
+                : "https://s3.amazonaws.com/freecodecamp/drums/Chord_2.mp3" : "#"
+            }
             className="clip"
             id="W"
           ></audio>
         </button>
         <button
+          id={isbank ? "Heater 3" : "Chord 3"}
           className="drum-pad"
-          onClick={() => {
-            var q = document.getElementById("E");
-            q.play();
-            isbank ? setDisplay('Heater-3') : setDisplay('Chord-3');
-          }}
-          onKeyDown={(e) => {
-            var q = document.getElementById("Q");
-            var keyCode = e.keyCode;
-            if(keyCode === 69){
-              q.play();
-              isbank ? setDisplay('Heater-1') : setDisplay('Chord-1');
-            }
-            
-            
-          }}
+          onClick={getIdOfButton}
         >
           E
           <audio
-            src={isbank ? "https://s3.amazonaws.com/freecodecamp/drums/Heater-3.mp3" : "https://s3.amazonaws.com/freecodecamp/drums/Chord_3.mp3"}
+            src={ isPower?
+              isbank
+                ? "https://s3.amazonaws.com/freecodecamp/drums/Heater-3.mp3"
+                : "https://s3.amazonaws.com/freecodecamp/drums/Chord_3.mp3" :"#"
+            }
             className="clip"
             id="E"
           ></audio>
         </button>
         <button
+          id={isbank ? "Heater 4" : "Shaker"}
           className="drum-pad"
-          onClick={() => {
-            var q = document.getElementById("A");
-            q.play();
-            isbank ? setDisplay('Heater-4') : setDisplay('Shaker');
-          }}
-          onKeyDown={(e) => {
-            var q = document.getElementById("Q");
-            var keyCode = e.keyCode;
-            if(keyCode === 65){
-              q.play();
-              isbank ? setDisplay('Heater-1') : setDisplay('Chord-1');
-            }
-            
-            
-          }}
+          onClick={getIdOfButton}
         >
           A
           <audio
-            src={isbank ? "https://s3.amazonaws.com/freecodecamp/drums/Heater-4_1.mp3" : "https://s3.amazonaws.com/freecodecamp/drums/Give_us_a_light.mp3"}
+            src={ isPower ?
+              isbank
+                ? "https://s3.amazonaws.com/freecodecamp/drums/Heater-4_1.mp3"
+                : "https://s3.amazonaws.com/freecodecamp/drums/Give_us_a_light.mp3" :"#"
+            }
             className="clip"
             id="A"
           ></audio>
         </button>
         <button
+          id={isbank ? "Clap" : "Open HH"}
           className="drum-pad"
-          onClick={() => {
-            var q = document.getElementById("S");
-            q.play();
-            isbank ? setDisplay('Clap') : setDisplay('Open HH');
-          }}
-          onKeyDown={(e) => {
-            var q = document.getElementById("Q");
-            var keyCode = e.keyCode;
-            if(keyCode === 83){
-              q.play();
-              isbank ? setDisplay('Heater-1') : setDisplay('Chord-1');
-            }
-            
-            
-          }}
+          onClick={getIdOfButton}
         >
           S
           <audio
-            src={isbank ? "https://s3.amazonaws.com/freecodecamp/drums/Heater-6.mp3" : "https://s3.amazonaws.com/freecodecamp/drums/Dry_Ohh.mp3"}
+            src={ isPower ?
+              isbank
+                ? "https://s3.amazonaws.com/freecodecamp/drums/Heater-6.mp3"
+                : "https://s3.amazonaws.com/freecodecamp/drums/Dry_Ohh.mp3" :"#"
+            }
             className="clip"
             id="S"
           ></audio>
         </button>
         <button
+          id={isbank ? "Open HH" : "Closed HH"}
           className="drum-pad"
-          onClick={() => {
-            var q = document.getElementById("D");
-            q.play();
-            isbank ? setDisplay('Open HH') : setDisplay('Closed HH');
-          }}
-          onKeyDown={(e) => {
-            var q = document.getElementById("Q");
-            var keyCode = e.keyCode;
-            if(keyCode === 68){
-              q.play();
-              isbank ? setDisplay('Heater-1') : setDisplay('Chord-1');
-            }
-            
-            
-          }}
+          onClick={getIdOfButton}
         >
           D
           <audio
-            src={isbank ? "https://s3.amazonaws.com/freecodecamp/drums/Dsc_Oh.mp3" : "https://s3.amazonaws.com/freecodecamp/drums/Bld_H1.mp3"}
+            src={isPower ?
+              isbank
+                ? "https://s3.amazonaws.com/freecodecamp/drums/Dsc_Oh.mp3"
+                : "https://s3.amazonaws.com/freecodecamp/drums/Bld_H1.mp3" :"#"
+            }
             className="clip"
             id="D"
           ></audio>
         </button>
         <button
+          id={isbank ? "Kick n' Hat" : "Punchy Kick"}
           className="drum-pad"
-          onClick={() => {
-            var q = document.getElementById("Z");
-            q.play();
-            isbank ? setDisplay('Kick n\' Hat') : setDisplay('Punchy Kick');
-          }}
-          onKeyDown={(e) => {
-            var q = document.getElementById("Q");
-            var keyCode = e.keyCode;
-            if(keyCode === 90){
-              q.play();
-              isbank ? setDisplay('Heater-1') : setDisplay('Chord-1');
-            }
-            
-            
-          }}
+          onClick={getIdOfButton}
         >
           Z
           <audio
-            src={isbank ? "https://s3.amazonaws.com/freecodecamp/drums/Kick_n_Hat.mp3" : "https://s3.amazonaws.com/freecodecamp/drums/punchy_kick_1.mp3"}
+            src={isPower ?
+              isbank
+                ? "https://s3.amazonaws.com/freecodecamp/drums/Kick_n_Hat.mp3"
+                : "https://s3.amazonaws.com/freecodecamp/drums/punchy_kick_1.mp3" : "#"
+            }
             className="clip"
             id="Z"
           ></audio>
         </button>
         <button
+          id={isbank ? "Kick" : "Side Stick"}
           className="drum-pad"
-          onClick={() => {
-            var q = document.getElementById("X");
-            q.play();
-            isbank ? setDisplay('Kick') : setDisplay('Side Stick');
-          }}
-          onKeyDown={(e) => {
-            var q = document.getElementById("Q");
-            var keyCode = e.keyCode;
-            if(keyCode === 88){
-              q.play();
-              isbank ? setDisplay('Heater-1') : setDisplay('Chord-1');
-            }
-            
-            
-          }}
+          onClick={getIdOfButton}
         >
           X
           <audio
-            src={isbank ? "https://s3.amazonaws.com/freecodecamp/drums/RP4_KICK_1.mp3" : "https://s3.amazonaws.com/freecodecamp/drums/side_stick_1.mp3"}
+            src={isPower ?
+              isbank
+                ? "https://s3.amazonaws.com/freecodecamp/drums/RP4_KICK_1.mp3"
+                : "https://s3.amazonaws.com/freecodecamp/drums/side_stick_1.mp3" : "#"
+            }
             className="clip"
             id="X"
           ></audio>
         </button>
         <button
+          id={isbank ? "Closed HH" : "Snare"}
           className="drum-pad"
-          onClick={() => {
-            var q = document.getElementById("C");
-            q.play();
-            isbank ? setDisplay('Closed HH') : setDisplay('Snare');
-          }}
-          onKeyDown={(e) => {
-            var q = document.getElementById("Q");
-            var keyCode = e.keyCode;
-            if(keyCode === 67){
-              q.play();
-              isbank ? setDisplay('Heater-1') : setDisplay('Chord-1');
-            }
-            
-            
-          }}
+          onClick={getIdOfButton}
         >
           C
           <audio
-            src={isbank ? "https://s3.amazonaws.com/freecodecamp/drums/Cev_H2.mp3" : "https://s3.amazonaws.com/freecodecamp/drums/Brk_Snr.mp3"}
+            src={isPower ? 
+              isbank
+                ? "https://s3.amazonaws.com/freecodecamp/drums/Cev_H2.mp3"
+                : "https://s3.amazonaws.com/freecodecamp/drums/Brk_Snr.mp3" : "#"
+            }
             className="clip"
             id="C"
           ></audio>
